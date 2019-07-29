@@ -3,43 +3,6 @@ resource "aws_key_pair" "auth"{
 	public_key 		= "${file("newKeyPair.pub")}"
 }
 
-// resource "aws_instance" "alb-instance"{
-//     // image_id        = "${lookup(var.aws_amis, var.aws_region)}"
-//     ami = "ami-2757f631"
-//     instance_type   = "t2.micro"
-
-// 	vpc_security_group_ids = ["${aws_security_group.alb-sec-group.id}"]
-
-
-// 	# Specifying the Public Key SSh
-// 	key_name 		= "${aws_key_pair.auth.key_name}"
-
-// 	# Creating a root block device
-// 	root_block_device {
-// 		volume_size = "40"
-//     volume_type = "gp2"
-//     delete_on_termination = "true"
-// 	}
-// }
-
-// resource "aws_launch_configuration" "alb-launch-config"{
-//   image_id = "${lookup(var.aws_amis, var.aws_region)}"
-//   instance_type = "t2.micro"
-//   vpc_security_group_ids = ["${aws_security_group.alb-sec-group.id}"]
-//   key_name = "${aws_key_pair.auth.key_name}"
-
-//   root_block_device {
-//     volume_size = "40"
-//     volume_type = "gp2"
-//     delete_on_termination = "true"
-//   }
-
-//   lifecycle{
-//     create_before_destroy = true
-//   }
-//   availability_zones = ["us-east-1a"]
-// }
-
 resource "aws_launch_template" "alb-template"{
   name_prefix = "alb-template"
   image_id = "${lookup(var.aws_amis, var.aws_region)}"
@@ -66,6 +29,7 @@ resource "aws_autoscaling_group" "autoscale_group" {
   // availability_zones = ["us-east-1a"]
   vpc_zone_identifier = ["${aws_subnet.PrivateSubnetA.id}","${aws_subnet.PrivateSubnetB.id}","${aws_subnet.PrivateSubnetC.id}"]
   // load_balancers = ["${aws_lb.alb.name}"]
+  target_group_arns    = ["${aws_alb_target_group.alb.arn}"]
   min_size = 3
   max_size = 3
 
